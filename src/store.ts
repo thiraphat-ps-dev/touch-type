@@ -18,8 +18,11 @@ export interface LangData {
   lesson: number;
 }
 
+export type Theme = 'light' | 'dark';
+
 export interface Data {
   ui: Lang;
+  theme: Theme;
   lang: Lang;
   th: LangData;
   en: LangData;
@@ -27,7 +30,7 @@ export interface Data {
 
 const KEY = 'touch-type:v1';
 const emptyLang = (): LangData => ({ keys: {}, lessons: {}, history: [], lesson: 0 });
-export const emptyData = (): Data => ({ ui: 'th', lang: 'th', th: emptyLang(), en: emptyLang() });
+export const emptyData = (): Data => ({ ui: 'th', theme: 'light', lang: 'th', th: emptyLang(), en: emptyLang() });
 
 function load(): Data {
   try {
@@ -37,6 +40,7 @@ function load(): Data {
     const base = emptyData();
     return {
       ui: d.ui === 'en' ? 'en' : 'th',
+      theme: d.theme === 'dark' ? 'dark' : 'light',
       lang: d.lang === 'en' ? 'en' : 'th',
       th: { ...base.th, ...d.th },
       en: { ...base.en, ...d.en },

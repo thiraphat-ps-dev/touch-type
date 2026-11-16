@@ -19,6 +19,9 @@ export function App() {
   useEffect(() => {
     document.documentElement.lang = ui;
   }, [ui]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = data.theme;
+  }, [data.theme]);
 
   const update = useCallback(
     (fn: (d: LangData) => LangData) => setData((d: Data) => ({ ...d, [d.lang]: fn(d[d.lang]) })),
@@ -63,6 +66,14 @@ export function App() {
               </Button>
             ))}
           </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-pressed={data.theme === 'dark'}
+            onClick={() => setData((d) => ({ ...d, theme: d.theme === 'dark' ? 'light' : 'dark' }))}
+          >
+            {data.theme === 'dark' ? `☀ ${t.themeLight}` : `☾ ${t.themeDark}`}
+          </Button>
           <Button size="sm" variant="ghost" onClick={() => setData((d) => ({ ...d, ui: d.ui === 'th' ? 'en' : 'th' }))}>
             {t.uiSwitch}
           </Button>
