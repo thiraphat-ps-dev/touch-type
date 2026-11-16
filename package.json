@@ -14,7 +14,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "thira-sans": "^0.2.0",
-    "thira-ui": "^0.5.0"
+    "thira-ui": "^0.6.0"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",

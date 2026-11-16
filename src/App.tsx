@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Badge, Button, Dialog, Tabs } from 'thira-ui';
+import { Badge, Button, Dialog, Kbd, Stat, Tabs, ToggleGroup } from 'thira-ui';
 import { Practice } from './components/Practice';
 import { Keyboard } from './components/Keyboard';
 import { LESSONS, lessonText, testText, weakText } from './content/lessons';
@@ -53,19 +53,22 @@ export function App() {
           <p className="tagline">{t.tagline}</p>
         </div>
         <div className="controls">
-          <div className="segmented" role="group" aria-label={t.practiceLang}>
-            {(['th', 'en'] as const).map((l) => (
-              <Button
-                key={l}
-                size="sm"
-                variant={lang === l ? 'solid' : 'outline'}
-                aria-pressed={lang === l}
-                onClick={() => setData((d) => ({ ...d, lang: l }))}
-              >
-                {l === 'th' ? t.langTh : t.langEn}
-              </Button>
-            ))}
-          </div>
+          <ToggleGroup
+            size="sm"
+            aria-label={t.practiceLang}
+            value={[lang]}
+            onValueChange={(v) => {
+              const l = v[0];
+              if (l === 'th' || l === 'en') setData((d) => ({ ...d, lang: l }));
+            }}
+          >
+            <ToggleGroup.Item value="th" lang="th">
+              {t.langTh}
+            </ToggleGroup.Item>
+            <ToggleGroup.Item value="en" lang="en">
+              {t.langEn}
+            </ToggleGroup.Item>
+          </ToggleGroup>
           <Button
             size="sm"
             variant="ghost"
@@ -210,7 +213,7 @@ function LessonsPanel({
               {t.newKeys}:{' '}
               <span className="chips" lang={lang}>
                 {[...lesson.keys].map((ch) => (
-                  <kbd key={ch}>{display(ch)}</kbd>
+                  <Kbd key={ch}>{display(ch)}</Kbd>
                 ))}
               </span>
             </p>
@@ -279,7 +282,7 @@ function WeakPanel({ lang, t, ld, record }: { lang: Lang; t: Strings; ld: LangDa
           {t.weakKeys}:{' '}
           <span className="chips" lang={lang}>
             {focus.map((ch) => (
-              <kbd key={ch}>{display(ch)}</kbd>
+              <Kbd key={ch}>{display(ch)}</Kbd>
             ))}
           </span>
         </p>
@@ -358,20 +361,15 @@ function StatsPanel({ lang, t, ld, onReset }: { lang: Lang; t: Strings; ld: Lang
 
   return (
     <div className="stats">
-      <dl className="summary">
-        <div>
-          <dt>{t.rounds}</dt>
-          <dd>{ld.history.length}</dd>
-        </div>
-        <div>
-          <dt>{t.bestTest}</dt>
-          <dd>{tests.length ? `${Math.max(...tests.map((h) => h.wpm))} ${t.wpm}` : '–'}</dd>
-        </div>
-        <div>
-          <dt>{t.avgAccuracy}</dt>
-          <dd>{avg === null ? '–' : `${avg}%`}</dd>
-        </div>
-      </dl>
+      <div className="summary">
+        <Stat label={t.rounds} value={ld.history.length} />
+        <Stat
+          label={t.bestTest}
+          value={tests.length ? Math.max(...tests.map((h) => h.wpm)) : '–'}
+          unit={tests.length ? t.wpm : undefined}
+        />
+        <Stat label={t.avgAccuracy} value={avg === null ? '–' : avg} unit={avg === null ? undefined : '%'} />
+      </div>
 
       <section>
         <h3>{t.heatmap}</h3>
@@ -382,7 +380,7 @@ function StatsPanel({ lang, t, ld, onReset }: { lang: Lang; t: Strings; ld: Lang
             {t.weakKeys}:{' '}
             <span className="chips" lang={lang}>
               {weak.map((ch) => (
-                <kbd key={ch}>{display(ch)}</kbd>
+                <Kbd key={ch}>{display(ch)}</Kbd>
               ))}
             </span>
           </p>

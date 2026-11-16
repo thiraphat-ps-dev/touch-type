@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { charFor, display, strokeFor, thaiName, type Lang } from '../engine/layouts';
 import { newSession, reduce, score, type Score, type Session } from '../engine/session';
+import { Kbd, Progress, Stat } from 'thira-ui';
 import type { Strings } from '../i18n';
 import { Keyboard } from './Keyboard';
 import { TextView } from './TextView';
@@ -107,27 +108,19 @@ export function Practice({ text, lang, t, limit, onFinish, onRestart, done }: Pr
 
   return (
     <div className="practice">
-      <dl className="meters">
-        <div>
-          <dt>
-            {t.wpm} <abbr title={t.wpmNote}>?</abbr>
-          </dt>
-          <dd>{sc.wpm}</dd>
-        </div>
-        <div>
-          <dt>{t.accuracy}</dt>
-          <dd>{sc.accuracy}%</dd>
-        </div>
-        <div>
-          <dt>{remaining === null ? t.time : t.left}</dt>
-          <dd>{remaining === null ? `${sc.seconds}s` : `${remaining}s`}</dd>
-        </div>
-        <div>
-          <dt>{t.errors}</dt>
-          <dd>{s.errors}</dd>
-        </div>
-      </dl>
-      {!limit && <progress className="progress" max={s.text.length} value={s.pos} aria-label={t.time} />}
+      <div className="meters">
+        <Stat className="meter" layout="inline" label={<span title={t.wpmNote}>{t.wpm}</span>} value={sc.wpm} />
+        <Stat className="meter" layout="inline" label={t.accuracy} value={sc.accuracy} unit="%" />
+        <Stat
+          className="meter"
+          layout="inline"
+          label={remaining === null ? t.time : t.left}
+          value={remaining === null ? sc.seconds : remaining}
+          unit="s"
+        />
+        <Stat className="meter" layout="inline" label={t.errors} value={s.errors} />
+      </div>
+      {!limit && <Progress size="sm" aria-label={t.progress} value={s.pos} max={s.text.length} />}
 
       <div
         className="type-area"
@@ -180,9 +173,9 @@ export function Practice({ text, lang, t, limit, onFinish, onRestart, done }: Pr
             {missed.length ? (
               <span className="chips" lang={lang}>
                 {missed.map(([ch, st]) => (
-                  <kbd key={ch}>
+                  <Kbd key={ch}>
                     {display(ch)} <small>×{st.miss}</small>
-                  </kbd>
+                  </Kbd>
                 ))}
               </span>
             ) : (
@@ -196,7 +189,9 @@ export function Practice({ text, lang, t, limit, onFinish, onRestart, done }: Pr
           <span className="muted">{t.next}:</span>{' '}
           {stroke && expected !== undefined && (
             <>
-              <kbd lang={lang}>{expected === ' ' ? t.space : display(expected)}</kbd>
+              <Kbd className="next" lang={lang}>
+                {expected === ' ' ? t.space : display(expected)}
+              </Kbd>
               {lang === 'th' && thaiName(expected) && <span className="name"> {thaiName(expected)}</span>}
               <span className="muted">
                 {' '}
@@ -206,7 +201,7 @@ export function Practice({ text, lang, t, limit, onFinish, onRestart, done }: Pr
             </>
           )}
           <span className="restart">
-            <kbd>{t.restartKey}</kbd> {t.restart}
+            <Kbd size="sm">{t.restartKey}</Kbd> {t.restart}
           </span>
         </p>
       )}

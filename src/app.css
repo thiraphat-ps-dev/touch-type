@@ -68,10 +68,6 @@ body {
   align-items: center;
   gap: 12px;
 }
-.segmented {
-  display: flex;
-  gap: 4px;
-}
 
 /* ---------- lessons layout ---------- */
 .lessons {
@@ -143,21 +139,8 @@ body {
   gap: 6px;
   vertical-align: middle;
 }
-kbd {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
-  min-width: 2em;
-  justify-content: center;
-  padding: 2px 8px;
-  border: 1px solid var(--thira-border-strong);
-  border-bottom-width: 2px;
-  border-radius: var(--thira-radius-sm);
-  background: var(--thira-surface);
-  font: inherit;
-  font-weight: 600;
-}
-kbd small {
+/* miss counts inside a Kbd chip */
+.chips small {
   font-weight: 400;
   color: var(--thira-text-muted);
 }
@@ -172,66 +155,9 @@ kbd small {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  margin: 0;
 }
-.meters > div {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 14px;
-}
-.meters > div,
-.summary > div {
-  padding-block: 10px;
-  padding-inline: 14px;
-  border: 1px solid var(--thira-border);
-  border-radius: var(--thira-radius-md);
-  background: var(--thira-surface);
-}
-.meters dt,
-.summary dt {
-  font-size: var(--thira-text-sm);
-  color: var(--thira-text-muted);
-}
-.meters dt abbr {
-  cursor: help;
-  text-decoration: none;
-  border: 1px solid var(--thira-border-strong);
-  border-radius: 50%;
-  padding: 0 5px;
-  font-size: 0.75em;
-}
-.meters dd {
-  margin: 0;
-  font-size: 1.3rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.summary dd {
-  margin: 2px 0 0;
-  font-size: 1.6rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.progress {
-  width: 100%;
-  height: 6px;
-  appearance: none;
-  border: 0;
-  border-radius: 99px;
-  background: var(--thira-surface-muted);
-  overflow: hidden;
-}
-.progress::-webkit-progress-bar {
-  background: var(--thira-surface-muted);
-}
-.progress::-webkit-progress-value {
-  background: var(--thira-accent);
-  transition: width 0.15s;
-}
-.progress::-moz-progress-bar {
-  background: var(--thira-accent);
+.meter {
+  padding-block: 6px;
 }
 
 .type-area {
@@ -315,7 +241,7 @@ kbd small {
   min-height: 2.2rem;
   margin: 0;
 }
-.hint kbd {
+.hint .next {
   font-size: 1.15rem;
   color: var(--thira-accent);
 }
@@ -540,20 +466,17 @@ kbd small {
   .meters {
     gap: 6px;
   }
-  .meters > div {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
+  /* stack the label over the value when the four boxes get narrow */
+  .meter {
+    grid-template-columns: 1fr;
     padding: 6px 10px;
   }
-  .meters dt {
+  .meter > :nth-child(1) {
     font-size: 0.75rem;
   }
-  .meters dt abbr {
-    display: none;
-  }
-  .meters dd {
+  .meter > :nth-child(2) {
     font-size: 1.1rem;
+    text-align: start;
   }
   .summary {
     grid-template-columns: 1fr;
