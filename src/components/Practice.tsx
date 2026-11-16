@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { charFor, display, strokeFor, thaiName, type Lang } from '../engine/layouts';
 import { newSession, reduce, score, type Score, type Session } from '../engine/session';
 import type { Strings } from '../i18n';
@@ -23,13 +23,14 @@ export function Practice({ text, lang, t, limit, onFinish, onRestart, done }: Pr
   const [now, setNow] = useState(() => performance.now());
   const [focused, setFocused] = useState(false);
   const [pressed, setPressed] = useState<ReadonlySet<string>>(new Set());
-  const area = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLInputElement>(null);
   const reported = useRef(false);
 
   useEffect(() => {
     dispatch({ type: 'reset', text });
     reported.current = false;
-    area.current?.focus();
+    // On phones and tablets, wait for a tap so the on-screen keyboard doesn't pop up by itself.
+    if (!matchMedia('(pointer: coarse)').matches) input.current?.focus({ preventScroll: true });
   }, [text]);
 
   const running = s.startedAt !== null && s.finishedAt === null;
@@ -59,11 +60,25 @@ export function Practice({ text, lang, t, limit, onFinish, onRestart, done }: Pr
     setPressed((p) => new Set(p).add(e.code));
     if (e.repeat) return;
     const ch = charFor(e.code, e.shiftKey, lang) ?? (e.key.length === 1 ? e.key : null);
+    // Anything else (an on-screen keyboard sends "Unidentified") arrives as text through onInput.
     if (ch === null) return;
     e.preventDefault();
+    type(ch);
+  }
+
+  function type(chars: string) {
     if (s.finishedAt !== null) return;
-    dispatch({ type: 'type', ch, now: performance.now() });
-    setNow(performance.now());
+    const n = performance.now();
+    for (const ch of chars) dispatch({ type: 'type', ch, now: n });
+    setNow(n);
+  }
+
+  /** Text from an on-screen keyboard: type it and clear the hidden field. */
+  function onInput(e: FormEvent<HTMLInputElement>) {
+    if ((e.nativeEvent as InputEvent).isComposing) return;
+    const el = e.currentTarget;
+    type(el.value);
+    el.value = '';
   }
 
   function onKeyUp(e: KeyboardEvent) {
@@ -115,13 +130,9 @@ export function Practice({ text, lang, t, limit, onFinish, onRestart, done }: Pr
       {!limit && <progress className="progress" max={s.text.length} value={s.pos} aria-label={t.time} />}
 
       <div
-        ref={area}
         className="type-area"
-        tabIndex={0}
-        role="textbox"
-        aria-label={t.clickToStart}
-        aria-readonly="true"
         data-focused={focused || undefined}
+        onClick={() => input.current?.focus({ preventScroll: true })}
         onKeyDown={onKeyDown}
         onKeyUp={onKeyUp}
         onFocus={() => setFocused(true)}
@@ -130,11 +141,30 @@ export function Practice({ text, lang, t, limit, onFinish, onRestart, done }: Pr
           setPressed(new Set());
         }}
       >
+        <input
+          ref={input}
+          className="catcher"
+          aria-label={t.clickToStart}
+          lang={lang}
+          inputMode="text"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          enterKeyHint="next"
+          onInput={onInput}
+          onCompositionEnd={(e) => {
+            type(e.currentTarget.value);
+            e.currentTarget.value = '';
+          }}
+        />
         <TextView text={s.text} pos={s.pos} missed={s.missed} wrong={!!s.wrong} lang={lang} />
         {!focused && !finished && (
           <div className="focus-hint">
-            <span>{t.clickToStart}</span>
-            <small>{t.noSwitch}</small>
+            <span className="fine">{t.clickToStart}</span>
+            <span className="coarse">{t.tapToStart}</span>
+            <small className="fine">{t.noSwitch}</small>
+            <small className="coarse">{t.touchNote}</small>
           </div>
         )}
       </div>
@@ -188,7 +218,6 @@ export function Practice({ text, lang, t, limit, onFinish, onRestart, done }: Pr
         pressed={pressed}
         wrong={wrongKey}
       />
-      <p className="mobile-note">{t.needsKeyboard}</p>
     </div>
   );
 }

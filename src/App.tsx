@@ -70,9 +70,11 @@ export function App() {
             size="sm"
             variant="ghost"
             aria-pressed={data.theme === 'dark'}
+            aria-label={t.themeDark}
             onClick={() => setData((d) => ({ ...d, theme: d.theme === 'dark' ? 'light' : 'dark' }))}
           >
-            {data.theme === 'dark' ? `☀ ${t.themeLight}` : `☾ ${t.themeDark}`}
+            <span aria-hidden="true">{data.theme === 'dark' ? '☀' : '☾'}</span>
+            <span className="btn-label">{data.theme === 'dark' ? t.themeLight : t.themeDark}</span>
           </Button>
           <Button size="sm" variant="ghost" onClick={() => setData((d) => ({ ...d, ui: d.ui === 'th' ? 'en' : 'th' }))}>
             {t.uiSwitch}
@@ -162,6 +164,22 @@ function LessonsPanel({
 
   return (
     <div className="lessons">
+      <div className="lesson-picker">
+        <Button size="sm" variant="outline" aria-label={t.prevLesson} disabled={index === 0} onClick={() => go(index - 1)}>
+          ‹
+        </Button>
+        <select aria-label={t.chooseLesson} value={index} onChange={(e) => go(Number(e.target.value))}>
+          {lessons.map((l, i) => (
+            <option key={l.id} value={i}>
+              {i + 1}. {l.title[ui]}
+              {ld.lessons[l.id]?.passed ? ' ✓' : ''}
+            </option>
+          ))}
+        </select>
+        <Button size="sm" variant="outline" aria-label={t.nextLesson} disabled={index === lessons.length - 1} onClick={() => go(index + 1)}>
+          ›
+        </Button>
+      </div>
       <nav className="lesson-list" aria-label={t.tabLessons}>
         <ol>
           {lessons.map((l, i) => {
